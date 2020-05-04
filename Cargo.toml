@@ -1,0 +1,10 @@
+[package]
+name = "chip8"
+version = "0.1.0"
+authors = ["Nikita Lapkov"]
+edition = "2018"
+
+[dependencies]
+rand = "0.7.3"
+sdl2 = "0.34"
+maplit = "1.0.2"
