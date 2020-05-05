@@ -7,13 +7,13 @@ use std::io::{Read, Error};
 use crate::display::Display;
 use crate::keypad::Keypad;
 
-// Few examples to show how fontset work:
-// DEC   HEX    BIN         RESULT    DEC   HEX    BIN         RESULT
-// 240   0xF0   1111 0000    ****     240   0xF0   1111 0000    ****
-// 144   0x90   1001 0000    *  *      16   0x10   0001 0000       *
-// 144   0x90   1001 0000    *  *      32   0x20   0010 0000      *
-// 144   0x90   1001 0000    *  *      64   0x40   0100 0000     *
-// 240   0xF0   1111 0000    ****      64   0x40   0100 0000     *
+/// Few examples to show how fontset work:
+/// DEC   HEX    BIN         RESULT    DEC   HEX    BIN         RESULT
+/// 240   0xF0   1111 0000    ****     240   0xF0   1111 0000    ****
+/// 144   0x90   1001 0000    *  *      16   0x10   0001 0000       *
+/// 144   0x90   1001 0000    *  *      32   0x20   0010 0000      *
+/// 144   0x90   1001 0000    *  *      64   0x40   0100 0000     *
+/// 240   0xF0   1111 0000    ****      64   0x40   0100 0000     *
 const FONTSET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -33,21 +33,28 @@ const FONTSET: [u8; 80] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 ];
 
+/// Represents CPU of CHIP-8 to execute ROM programs
 pub struct Cpu {
-    // Memory map:
-    // 0x000-0x1FF - Chip 8 interpreter (contains font set in emu)
-    // 0x050-0x0A0 - Used for the built in 4x5 pixel font set (0-F)
-    // 0x200-0xFFF - Program ROM and work RAM
+    /// First 80 bytes are used to store fontset.
+    /// Program ROM and work RAM starts from offset 0x200
     memory: [u8; 4096],
 
-    // Stack and stack pointer (sp)
+    /// Stack has only 16 levels. It used to store PC to return after
+    /// calls to subroutines. SP stands for stack pointer
     stack: [usize; 16],
     sp: usize,
 
-    // Registers
+    /// 15 general purpose registers (usually named as V0, V1, ...).
+    /// VF (16th register) is used for the carry flag
     registers: [u8; 16],
-    index: usize,
+
+    /// PC points to the instruction in memory to be executed.
+    /// Index is a separate 2-byte register used to address memory
     pc: usize,
+    index: usize,
+
+    /// Timers go down every cycle. Sound timer is used to generate
+    /// beeps after certain amount of cycles
     delay_timer: u8,
     sound_timer: u8,
 
@@ -55,6 +62,7 @@ pub struct Cpu {
 }
 
 impl Cpu {
+    /// Reads program from file and constructs "CPU" to execute it
     pub fn new(filename: &str) -> Result<Cpu, Error> {
         let mut memory = [0; 4096];
 
@@ -74,8 +82,8 @@ impl Cpu {
             stack: [0; 16],
             sp: 0,
             registers: [0; 16],
-            index: 0,
             pc: 0x200,
+            index: 0,
             delay_timer: 0,
             sound_timer: 0,
             rand: rand::thread_rng(),
@@ -86,6 +94,7 @@ impl Cpu {
         ((self.memory[self.pc] as u16) << 8) | (self.memory[(self.pc + 1) as usize] as u16)
     }
 
+    /// Reads and executes one opcode of program
     pub fn run_cycle(&mut self, display: &mut Display, keypad: &Keypad) -> Option<String> {
         let opcode = self.read_opcode();
         self.pc += 2;

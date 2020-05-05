@@ -1,3 +1,4 @@
+/// Represents CHIP-8 keypad with 16 keys on it
 pub struct Keypad {
     keys: [bool; 16],
 }

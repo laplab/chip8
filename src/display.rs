@@ -1,6 +1,7 @@
 pub const SCREEN_WIDTH: usize = 64;
 pub const SCREEN_HEIGHT: usize = 32;
 
+/// Represents CHIP-8 64x32 screen
 pub struct Display {
     screen: [u8; SCREEN_WIDTH * SCREEN_HEIGHT],
 }
@@ -28,6 +29,19 @@ impl Display {
         }
     }
 
+    /// Draws sprite on the display. Sprite must be encoded as a slice of bytes where
+    /// each byte represents a row in image. If bit in binary representation of byte is
+    /// set to 1, then the color of pixel at this column in the row is black. Otherwise it is
+    /// white.
+    /// Consider an example:
+    /// ```
+    /// DEC   HEX    BIN         RESULT
+    /// 240   0xF0   1111 0000    ****
+    /// 144   0x90   1001 0000    *  *
+    /// 144   0x90   1001 0000    *  *
+    /// 144   0x90   1001 0000    *  *
+    /// 240   0xF0   1111 0000    ****
+    /// ```
     pub fn draw_sprite(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
         let mut collision = false;
         for (i, &row) in sprite.iter().enumerate() {

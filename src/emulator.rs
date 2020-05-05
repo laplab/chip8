@@ -22,6 +22,7 @@ pub enum EmulatorError {
     RuntimeError(String),
 }
 
+/// CHIP-8 emulator
 pub struct Emulator {
     canvas: WindowCanvas,
     events: EventPump,
@@ -44,6 +45,7 @@ impl Emulator {
         Emulator { canvas, events }
     }
 
+    /// Runs CHIP-8 ROM from specified filename
     pub fn run(&mut self, filename: &str) -> Result<(), EmulatorError> {
         let mut keypad = Keypad::new();
         let mut display = Display::new();
